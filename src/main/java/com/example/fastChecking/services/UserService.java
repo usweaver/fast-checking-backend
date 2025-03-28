@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.nio.CharBuffer;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import com.example.fastChecking.dto.CredentialsDto;
 import com.example.fastChecking.dto.SignUpDto;
@@ -55,7 +56,7 @@ public class UserService {
     return userDto;
   }
 
-  public Long getUserId() {
+  public UUID getUserId() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     UserDto userDto = (UserDto) authentication.getPrincipal();
     return userDto.getId();

@@ -39,8 +39,11 @@ public class DataLoader implements CommandLineRunner {
     log.info("Number of accounts created: {}", accounts.size());
     List<Category> categories = createCategories(users);
     log.info("Number of categories created: {}", categories.size());
-    List<Transaction> transactions = createTransactions(accounts, categories);
-    log.info("Number of transactions created: {}", transactions.size());
+    List<Transaction> transactions = createTransactions(accounts, categories, "2025-03");
+    List<Transaction> transactions2 = createTransactions(accounts, categories, "2025-02");
+    List<Transaction> transactions3 = createTransactions(accounts, categories, "2025-01");
+    log.info("Number of transactions created: {}",
+        transactions.size() + transactions2.size() + transactions3.size());
 
     log.info("End of loading datas!");
   }
@@ -55,11 +58,9 @@ public class DataLoader implements CommandLineRunner {
 
   private List<Account> createAccounts(List<User> users) {
 
-    List<Account> accounts = users.stream()
-        .flatMap(user -> Arrays
-            .asList(Account.builder().name("Checking account").type("checking").user(user).build())
-            .stream())
-        .toList();
+    List<Account> accounts =
+        users.stream().flatMap(user -> Arrays.asList(Account.builder().name("Checking account")
+            .type("checking").user(user).balance(50000).build()).stream()).toList();
 
     return accountRepository.saveAll(accounts);
 
@@ -67,47 +68,69 @@ public class DataLoader implements CommandLineRunner {
 
   private List<Category> createCategories(List<User> users) {
 
-    List<Category> categories =
-        users.stream()
-            .flatMap(user -> Arrays.asList(
-                Category.builder().name("Alimentation").icon("ustensils").user(user).build(),
+    List<Category> categories = users.stream()
+        .flatMap(user -> Arrays
+            .asList(Category.builder().name("Alimentation").icon("utensils").user(user).build(),
                 Category.builder().name("Transport").icon("car").user(user).build(),
+                Category.builder().name("Logement").icon("house").user(user).build(),
+                Category.builder().name("Télécommunications").icon("wifi").user(user).build(),
                 Category.builder().name("Sorties").icon("beer-mug-empty").user(user).build(),
                 Category.builder().name("Santé").icon("staff-snake").user(user).build(),
                 Category.builder().name("Loisirs").icon("volleyball").user(user).build(),
-                Category.builder().name("Autres").icon("tag").user(user).build()).stream())
-            .toList();
+                Category.builder().name("Voyages").icon("plane-up").user(user).build(),
+                Category.builder().name("Vêtements").icon("shirt").user(user).build(),
+                Category.builder().name("Épargne").icon("building-columns").user(user).build(),
+                Category.builder().name("Salaires").icon("money-check-dollar").user(user).build(),
+                Category.builder().name("Impôts").icon("flag-usa").user(user).build(),
+                Category.builder().name("Assurances").icon("shield-halved").user(user).build(),
+                Category.builder().name("Autres").icon("tag").user(user).build())
+            .stream())
+        .toList();
 
     return categoryRepository.saveAll(categories);
 
   }
 
-  private List<Transaction> createTransactions(List<Account> accounts, List<Category> categories) {
+  private List<Transaction> createTransactions(List<Account> accounts, List<Category> categories,
+      String month) {
 
-    List<Transaction> transactions =
-        accounts.stream()
-            .flatMap(
-                account -> categories.stream()
-                    .flatMap(
-                        category -> Arrays
-                            .asList(
-                                Transaction.builder().name("Transaction").amount(12345)
-                                    .account(account).category(category).checked(true)
-                                    .regularization(false).type("debit").date("2025-03-25").build(),
-                                Transaction.builder().name("Transaction").amount(123)
-                                    .account(account).category(category).checked(true)
-                                    .regularization(false).type("debit").date("2025-03-25").build(),
-                                Transaction.builder().name("Transaction").amount(5678)
-                                    .account(account).category(category).checked(true)
-                                    .regularization(false).type("debit").date("2025-03-25").build(),
-                                Transaction.builder().name("Transaction").amount(7896)
-                                    .account(account).category(category).checked(true)
-                                    .regularization(false).type("debit").date("2025-03-25").build(),
-                                Transaction.builder().name("Transaction").amount(500)
-                                    .account(account).category(category).checked(true)
-                                    .regularization(false).type("debit").date("2025-03-25").build())
-                            .stream()))
-            .toList();
+    List<Transaction> transactions = accounts.stream()
+        .flatMap(account -> Arrays.asList(
+            Transaction.builder().name("Drive").amount(7805).account(account)
+                .category(categories.get(0)).checked(true).regularization(false).type("debit")
+                .date(month + "-25").build(),
+            Transaction.builder().name("Doliprane").amount(520).account(account)
+                .category(categories.get(5)).checked(true).regularization(false).type("debit")
+                .date(month + "-16").build(),
+            Transaction.builder().name("Ninkasi").amount(1500).account(account)
+                .category(categories.get(4)).checked(true).regularization(false).type("debit")
+                .date(month + "-15").build(),
+            Transaction.builder().name("Abonnement Basic-fit").amount(2999).account(account)
+                .category(categories.get(6)).checked(true).regularization(false).type("debit")
+                .date(month + "-12").build(),
+            Transaction.builder().name("Drive").amount(6955).account(account)
+                .category(categories.get(0)).checked(true).regularization(false).type("debit")
+                .date(month + "-10").build(),
+            Transaction.builder().name("Assurance auto").amount(7000).account(account)
+                .category(categories.get(12)).checked(true).regularization(false).type("debit")
+                .date(month + "-08").build(),
+            Transaction.builder().name("Assurance habitation").amount(999).account(account)
+                .category(categories.get(12)).checked(true).regularization(false).type("debit")
+                .date(month + "-08").build(),
+            Transaction.builder().name("Box internet").amount(2400).account(account)
+                .category(categories.get(3)).checked(true).regularization(false).type("debit")
+                .date(month + "-07").build(),
+            Transaction.builder().name("Forfait mobile").amount(1999).account(account)
+                .category(categories.get(3)).checked(true).regularization(false).type("debit")
+                .date(month + "-05").build(),
+            Transaction.builder().name("Loyer").amount(58500).account(account)
+                .category(categories.get(2)).checked(true).regularization(false).type("debit")
+                .date(month + "-05").build(),
+            Transaction.builder().name("Salaire").amount(190000).account(account)
+                .category(categories.get(10)).checked(true).regularization(false).type("credit")
+                .date(month + "-03").build())
+            .stream())
+        .toList();
 
     return transactionRepository.saveAll(transactions);
 

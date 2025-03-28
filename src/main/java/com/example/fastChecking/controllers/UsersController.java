@@ -7,6 +7,7 @@ import com.example.fastChecking.exceptions.AppException;
 import com.example.fastChecking.repositories.UserRepository;
 import com.example.fastChecking.services.UserService;
 import lombok.RequiredArgsConstructor;
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +22,7 @@ public class UsersController {
 
   @GetMapping("/user")
   public ResponseEntity<UserInfosDto> getUserInfos() {
-    Long userId = UserService.getUserId();
+    UUID userId = UserService.getUserId();
     User user = UserRepository.findById(userId)
         .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 

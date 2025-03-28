@@ -10,8 +10,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
 
   private final UserAuthProvider userAuthProvider;
@@ -36,7 +38,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
               .setAuthentication(userAuthProvider.validateToken(authElements[1]));
         } catch (RuntimeException e) {
           SecurityContextHolder.clearContext();
-          throw e;
+          log.error(path + " " + e.getMessage());
+          response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+          response.setContentType("application/json");
+          response.getWriter().write("{\"error\": \"Token invalid\"}");
+          return;
         }
       }
     } else {

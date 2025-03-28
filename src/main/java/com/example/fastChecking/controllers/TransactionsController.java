@@ -1,7 +1,7 @@
 package com.example.fastChecking.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
-import com.example.fastChecking.dto.TransactionRequestDto;
+import com.example.fastChecking.dto.transactions.AddTransactionRequestDto;
 import com.example.fastChecking.entities.Account;
 import com.example.fastChecking.entities.Category;
 import com.example.fastChecking.entities.Transaction;
@@ -26,7 +26,8 @@ public class TransactionsController {
   private final com.example.fastChecking.repositories.TransactionRepository TransactionRepository;
 
   @PostMapping("/transactions")
-  public ResponseEntity<Transaction> createTransaction(@RequestBody TransactionRequestDto entity) {
+  public ResponseEntity<Transaction> createTransaction(
+      @RequestBody AddTransactionRequestDto entity) {
 
     Account account = AccountRepository.findById(entity.getAccountId())
         .orElseThrow(() -> new AppException("Account not found", HttpStatus.NOT_FOUND));
