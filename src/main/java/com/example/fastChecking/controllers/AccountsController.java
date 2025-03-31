@@ -1,6 +1,7 @@
 package com.example.fastChecking.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
+import com.example.fastChecking.dto.account.AccountBalanceResponseDto;
 import com.example.fastChecking.dto.account.AccountInfosResponseDto;
 import com.example.fastChecking.dto.dashboard.DashboardAccountInfosResponseDto;
 import com.example.fastChecking.entities.Account;
@@ -55,6 +56,17 @@ public class AccountsController {
     AccountInfosResponseDto accountInfosResponseDto = AccountInfosResponseDto.builder()
         .balance(account.getBalance()).months(months).transactions(transactions).build();
     return accountInfosResponseDto;
+  }
+
+  @GetMapping("/accounts/{accountId}/balance")
+  public AccountBalanceResponseDto getAccountBalance(@PathVariable UUID accountId) {
+
+    Account account = accountRepository.findById(accountId)
+        .orElseThrow(() -> new AppException("Account not found", HttpStatus.NOT_FOUND));
+
+    AccountBalanceResponseDto accountBalanceResponseDto =
+        AccountBalanceResponseDto.builder().balance(account.getBalance()).build();
+    return accountBalanceResponseDto;
   }
 
 

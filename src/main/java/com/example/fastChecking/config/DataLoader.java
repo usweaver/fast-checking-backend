@@ -83,7 +83,8 @@ public class DataLoader implements CommandLineRunner {
                 Category.builder().name("Salaires").icon("money-check-dollar").user(user).build(),
                 Category.builder().name("Impôts").icon("flag-usa").user(user).build(),
                 Category.builder().name("Assurances").icon("shield-halved").user(user).build(),
-                Category.builder().name("Autres").icon("tag").user(user).build())
+                Category.builder().name("Autres").icon("tag").user(user).build(), Category.builder()
+                    .name("Régularisation").icon("arrow-right-arrow-left").user(user).build())
             .stream())
         .toList();
 

@@ -10,8 +10,11 @@ import com.example.fastChecking.repositories.AccountRepository;
 import com.example.fastChecking.repositories.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -51,6 +54,28 @@ public class TransactionsController {
     Transaction savedTransaction = TransactionRepository.save(newTransaction);
 
     return ResponseEntity.ok(savedTransaction);
+  }
+
+  @DeleteMapping("/transactions/{transactionId}")
+  public ResponseEntity<Transaction> deleteTransaction(@PathVariable UUID transactionId) {
+
+    Transaction transaction = TransactionRepository.findById(transactionId)
+        .orElseThrow(() -> new AppException("Transaction not found", HttpStatus.NOT_FOUND));
+
+    Account account = AccountRepository.findById(transaction.getAccount().getId())
+        .orElseThrow(() -> new AppException("Account not found", HttpStatus.NOT_FOUND));
+
+    if (transaction.getType().equals("debit")) {
+      account.setBalance(account.getBalance() + transaction.getAmount());
+    } else {
+      account.setBalance(account.getBalance() - transaction.getAmount());
+    } ;
+
+    AccountRepository.save(account);
+
+    TransactionRepository.delete(transaction);
+
+    return ResponseEntity.ok(transaction);
   }
 
 
