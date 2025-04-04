@@ -21,7 +21,7 @@ import com.example.fastChecking.repositories.UserRepository;
 @Component
 @Profile("dev")
 @RequiredArgsConstructor
-public class DataLoader implements CommandLineRunner {
+public class DevDataLoader implements CommandLineRunner {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
@@ -32,6 +32,8 @@ public class DataLoader implements CommandLineRunner {
   @Override
   public void run(String... args) {
     log.info("Start loading datas...");
+
+    userRepository.deleteAll();
 
     List<User> users = createUsers();
     log.info("Number of users created: {}", users.size());
