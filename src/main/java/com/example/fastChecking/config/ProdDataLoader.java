@@ -1,5 +1,7 @@
 package com.example.fastChecking.config;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.boot.CommandLineRunner;
@@ -8,6 +10,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.example.fastChecking.constants.ExampleCategories;
+import com.example.fastChecking.constants.ExampleCategory;
+import com.example.fastChecking.constants.ExampleTransaction;
+import com.example.fastChecking.constants.ExampleTransactions;
 import com.example.fastChecking.entities.Account;
 import com.example.fastChecking.entities.Category;
 import com.example.fastChecking.entities.Transaction;
@@ -41,9 +47,12 @@ public class ProdDataLoader implements CommandLineRunner {
     log.info("Number of accounts created: {}", accounts.size());
     List<Category> categories = createCategories(users);
     log.info("Number of categories created: {}", categories.size());
-    List<Transaction> transactions = createTransactions(accounts, categories, "2025-03");
-    List<Transaction> transactions2 = createTransactions(accounts, categories, "2025-02");
-    List<Transaction> transactions3 = createTransactions(accounts, categories, "2025-01");
+    List<Transaction> transactions =
+        createTransactions(accounts, categories, getPreviousMonth(0), selectExampleTransactions());
+    List<Transaction> transactions2 = createTransactions(accounts, categories, getPreviousMonth(1),
+        ExampleTransactions.EXEMPLE_TRANSACTIONS.getTransactions());
+    List<Transaction> transactions3 = createTransactions(accounts, categories, getPreviousMonth(2),
+        ExampleTransactions.EXEMPLE_TRANSACTIONS.getTransactions());
     log.info("Number of transactions created: {}",
         transactions.size() + transactions2.size() + transactions3.size());
 
@@ -66,84 +75,64 @@ public class ProdDataLoader implements CommandLineRunner {
   }
 
   private List<Account> createAccounts(List<User> users) {
-
-    List<Account> accounts =
-        users.stream().flatMap(user -> Arrays.asList(Account.builder().name("Checking account")
-            .type("checking").user(user).balance(50000).build()).stream()).toList();
+    List<Account> accounts = new ArrayList<>();
+    for (User user : users) {
+      accounts.add(Account.builder().name("Checking account").type("checking").user(user)
+          .balance(50000).build());
+    }
 
     return accountRepository.saveAll(accounts);
-
   }
 
   private List<Category> createCategories(List<User> users) {
+    List<Category> categories = new ArrayList<>();
 
-    List<Category> categories = users.stream()
-        .flatMap(user -> Arrays
-            .asList(Category.builder().name("Alimentation").icon("utensils").user(user).build(),
-                Category.builder().name("Transport").icon("car").user(user).build(),
-                Category.builder().name("Logement").icon("house").user(user).build(),
-                Category.builder().name("Télécommunications").icon("wifi").user(user).build(),
-                Category.builder().name("Sorties").icon("beer-mug-empty").user(user).build(),
-                Category.builder().name("Santé").icon("staff-snake").user(user).build(),
-                Category.builder().name("Loisirs").icon("volleyball").user(user).build(),
-                Category.builder().name("Voyages").icon("plane-up").user(user).build(),
-                Category.builder().name("Vêtements").icon("shirt").user(user).build(),
-                Category.builder().name("Épargne").icon("building-columns").user(user).build(),
-                Category.builder().name("Salaires").icon("money-check-dollar").user(user).build(),
-                Category.builder().name("Impôts").icon("flag-usa").user(user).build(),
-                Category.builder().name("Assurances").icon("shield-halved").user(user).build(),
-                Category.builder().name("Autres").icon("tag").user(user).build(), Category.builder()
-                    .name("Régularisation").icon("arrow-right-arrow-left").user(user).build())
-            .stream())
-        .toList();
+    for (User user : users) {
+      for (ExampleCategory exampleCategory : ExampleCategories.CATEGORIES.getCategories()) {
+        categories.add(Category.builder().name(exampleCategory.getName())
+            .icon(exampleCategory.getIcon()).user(user).build());
+      }
+    }
 
     return categoryRepository.saveAll(categories);
 
   }
 
   private List<Transaction> createTransactions(List<Account> accounts, List<Category> categories,
-      String month) {
+      String month, ExampleTransaction[] exampleTransactions) {
+    List<Transaction> transactions = new ArrayList<>();
 
-    List<Transaction> transactions = accounts.stream()
-        .flatMap(account -> Arrays.asList(
-            Transaction.builder().name("Drive").amount(7805).account(account)
-                .category(categories.get(0)).checked(true).regularization(false).type("debit")
-                .date(month + "-25").build(),
-            Transaction.builder().name("Doliprane").amount(520).account(account)
-                .category(categories.get(5)).checked(true).regularization(false).type("debit")
-                .date(month + "-16").build(),
-            Transaction.builder().name("Ninkasi").amount(1500).account(account)
-                .category(categories.get(4)).checked(true).regularization(false).type("debit")
-                .date(month + "-15").build(),
-            Transaction.builder().name("Abonnement Basic-fit").amount(2999).account(account)
-                .category(categories.get(6)).checked(true).regularization(false).type("debit")
-                .date(month + "-12").build(),
-            Transaction.builder().name("Drive").amount(6955).account(account)
-                .category(categories.get(0)).checked(true).regularization(false).type("debit")
-                .date(month + "-10").build(),
-            Transaction.builder().name("Assurance auto").amount(7000).account(account)
-                .category(categories.get(12)).checked(true).regularization(false).type("debit")
-                .date(month + "-08").build(),
-            Transaction.builder().name("Assurance habitation").amount(999).account(account)
-                .category(categories.get(12)).checked(true).regularization(false).type("debit")
-                .date(month + "-08").build(),
-            Transaction.builder().name("Box internet").amount(2400).account(account)
-                .category(categories.get(3)).checked(true).regularization(false).type("debit")
-                .date(month + "-07").build(),
-            Transaction.builder().name("Forfait mobile").amount(1999).account(account)
-                .category(categories.get(3)).checked(true).regularization(false).type("debit")
-                .date(month + "-05").build(),
-            Transaction.builder().name("Loyer").amount(58500).account(account)
-                .category(categories.get(2)).checked(true).regularization(false).type("debit")
-                .date(month + "-05").build(),
-            Transaction.builder().name("Salaire").amount(190000).account(account)
-                .category(categories.get(10)).checked(true).regularization(false).type("credit")
-                .date(month + "-03").build())
-            .stream())
-        .toList();
+    for (Account account : accounts) {
+      for (ExampleTransaction exampleTransaction : exampleTransactions) {
+        transactions.add(Transaction.builder().name(exampleTransaction.getName())
+            .amount(exampleTransaction.getAmount()).account(account)
+            .category(categories.get(exampleTransaction.getCategoryId())).checked(true)
+            .regularization(false).type(exampleTransaction.getType())
+            .date(month + stringifyDay(exampleTransaction.getDay())).build());
+      }
+    }
 
     return transactionRepository.saveAll(transactions);
+  }
 
+  private String getPreviousMonth(Integer delta) {
+    LocalDate previousDate = java.time.LocalDate.now().minusMonths(delta);
+
+    int year = previousDate.getYear();
+    int monthValue = previousDate.getMonthValue();
+    String month = monthValue < 10 ? "0" + monthValue : String.valueOf(monthValue);
+    return year + "-" + month;
+  }
+
+  private ExampleTransaction[] selectExampleTransactions() {
+    Integer day = java.time.LocalDate.now().getDayOfMonth();
+    return Arrays.stream(ExampleTransactions.EXEMPLE_TRANSACTIONS.getTransactions())
+        .filter(exampleTransaction -> exampleTransaction.getDay() <= day)
+        .toArray(ExampleTransaction[]::new);
+  }
+
+  private String stringifyDay(Integer day) {
+    return day < 10 ? "-0" + day : "-" + day;
   }
 
 }
